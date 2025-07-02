@@ -1,2 +1,6 @@
 pygame
 numpy
+pandas
+seaborn
+matplotlib
+notebook
