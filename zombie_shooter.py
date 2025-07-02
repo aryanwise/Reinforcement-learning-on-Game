@@ -1,3 +1,37 @@
+"""
+Original Game: Zombie Shooter game built using the Pygame library.
+
+GAME OVERVIEW:
+
+Gameplay:
+
+- The player controls a green square (the player) that can move around the screen using the 'A', 'D', 'W', and 'S' keys.
+- The player can aim and shoot bullets in the direction of the arrow keys.
+- Zombies (red squares) spawn at random edges of the screen and move towards the player.
+- The player must avoid zombies and shoot them to earn points.
+- The game has multiple phases with increasing difficulty (zombie spawn rate and speed).
+
+Game Mechanics:
+
+- Player movement and aiming
+- Bullet shooting and collision detection
+- Zombie spawning and movement
+- Collision detection between player and zombies
+- Game over condition (player health reaches zero)
+- Scorekeeping and phase progression
+
+Code Structure:
+
+The game is organized into several functions:
+    - handle_input: handles player input (keyboard and mouse events)
+    - move_player: updates player position based on input
+    - update_game: updates game state (zombie spawning, movement, collision detection, etc.)
+    - draw_game: draws the game state to the screen
+    - main: the main game loop that calls the above functions and limits the frame rate
+
+Overall, this code provides a basic implementation of a zombie shooter game using Pygame, with features like player movement, aiming, shooting, zombie spawning, and collision detection.
+"""
+
 import pygame
 import sys
 import random
@@ -61,6 +95,16 @@ last_key = None
 
 
 def reset_game():
+    """
+    Resets the game to its initial state.
+
+    This function reinitializes key game variables to their starting values,
+    positioning the player at the center of the screen, clearing bullets and
+    zombies, resetting health, score, and phase, and setting the game_over flag
+    to False. It also records the current time for phase management and updates
+    the time of the last zombie spawn.
+    """
+
     global player, bullets, zombies, health, game_over, last_spawn, score, phase, phase_start
     player = pygame.Rect(WIDTH // 2 - 20, HEIGHT // 2 - 20, 40, 40)
     bullets = []
@@ -74,6 +118,15 @@ def reset_game():
 
 
 def move_player():
+    """
+    Moves the player based on keyboard input.
+
+    This function checks the current state of keyboard keys to determine
+    the direction of player movement. The player is moved left, right, up,
+    or down by a predefined speed if the corresponding 'A', 'D', 'W', or 'S'
+    key is pressed, ensuring the player remains within the screen bounds.
+    """
+
     keys = pygame.key.get_pressed()
     if keys[pygame.K_a] and player.left > 0:
         player.x -= PLAYER_SPEED
@@ -86,6 +139,17 @@ def move_player():
 
 
 def handle_input():
+    """
+    Handles player input and updates game state accordingly.
+
+    This function processes events from the Pygame event queue. If the quit event
+    is detected, it terminates the game. For keydown events, it manages player
+    actions such as aiming and shooting. The arrow keys set the aim direction,
+    shown by a cyan arrow. Double-tapping an arrow key within a defined time
+    interval fires a bullet in the current aim direction. It updates the last
+    key pressed and the time of the key press to handle double-tap shooting.
+    """
+
     global aim_direction, last_key, last_key_time, bullets, game_over
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -117,6 +181,18 @@ def handle_input():
 
 
 def update_game():
+    """
+    Updates the game state by managing phases, spawning and moving zombies,
+    moving bullets, and checking for collisions.
+
+    This function progresses the game through its phases based on elapsed time,
+    spawns zombies at random edges with increasing frequency and speed as phases
+    progress, and moves existing zombies towards the player. It also handles
+    the movement of bullets and checks for collisions between bullets and zombies
+    to update the score. Player health is reduced upon contact with zombies,
+    leading to a game over if health reaches zero.
+    """
+
     global phase, phase_start, last_spawn, health, game_over, score
     # Update phase
     if phase < len(PHASES) - 1 and time.time() - phase_start > PHASES[phase]["time"]:
@@ -172,6 +248,13 @@ def update_game():
 
 
 def draw_game():
+    """
+    Draws the current game state to the screen.
+
+    This function draws the player, zombies, bullets, aim arrow, and text
+    elements such as health, score, and phase. If the game is over, it also
+    renders a game over message and waits for 2 seconds before exiting.
+    """
     screen.blit(background, (0, 0))
     screen.blit(player_img, player)
     for zombie in zombies:
@@ -199,6 +282,13 @@ def draw_game():
 
 
 def main():
+    """
+    Main game loop.
+
+    Calls handle_input, move_player, update_game, draw_game, and limits the
+    frame rate to FPS in an infinite loop. The game loop will continue running
+    until the user closes the game window, at which point the game will exit.
+    """
     global game_over
     while True:
         handle_input()

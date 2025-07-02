@@ -1,3 +1,7 @@
+"""
+This game environment is the enhanced version of the zombie_shooter.py incorporating the Q-learning components like state, actions and rewards to train the Q-learning model
+"""
+
 import pygame
 import sys
 import random
@@ -23,7 +27,7 @@ DOUBLE_TAP_TIME = 0.3
 
 # Game phases
 PHASES = [
-    {"name": "Phase 1", "spawn_delay": 1500, "zombie_speed": 2, "time": 30},
+    {"name": "Phase 1", "spawn_delay": 1500, "zombie_speed": 2, "time": 60},
     {"name": "Phase 2", "spawn_delay": 1000, "zombie_speed": 3, "time": 30},
     {"name": "Phase 3", "spawn_delay": 500, "zombie_speed": 4, "time": 999999},
 ]
@@ -62,6 +66,15 @@ last_key = None
 
 
 def reset_game():
+    """
+    Resets the game to its initial state.
+
+    This function reinitializes key game variables to their starting values,
+    positioning the player at the center of the screen, clearing bullets and
+    zombies, resetting health, score, and phase, and setting the game_over flag
+    to False. It also records the current time for phase management and updates
+    the time of the last zombie spawn.
+    """
     global player, bullets, zombies, health, game_over, last_spawn, score, phase, phase_start, aim_direction
     player = pygame.Rect(WIDTH // 2 - 20, HEIGHT // 2 - 20, 40, 40)
     bullets = []
@@ -76,6 +89,17 @@ def reset_game():
 
 
 def get_state():
+    """
+    Returns the current state of the game as a tuple representing:
+    1. Player's position relative to the walls (0: not near, 1: near top, 2: near bottom, 3: near left, 4: near right).
+    2. Player's health as an integer.
+    3. Current game phase as an integer.
+    4. Direction of the nearest zombie relative to the player (0: no zombie, 1: up, 2: up-right, 3: right, 4: down-right,
+       5: down, 6: down-left, 7: left, 8: up-left).
+
+    The state provides a simplified representation of the game's condition used for decision-making
+    in reinforcement learning.
+    """
     # 1. Player position (near wall or not)
     player_pos_state = 0
     if player.top < 50:
@@ -128,6 +152,19 @@ def get_state():
 
 
 def step(action):
+    """
+    Takes an action and updates the game state.
+
+    The action is an integer in the range [0, 8):
+        0: Stay
+        1-4: Move up, down, left, right
+        5-8: Shoot up, down, left, right
+
+    Returns a tuple of (next state, reward, done) where:
+        next state is a tuple of four integers representing the game state
+        reward is a float representing the reward for the action
+        done is a boolean indicating whether the game is over
+    """
     global player, health, score, game_over, aim_direction, phase, phase_start, last_spawn
     reward = 0.1  # Small reward for staying alive
     done = False
@@ -233,6 +270,15 @@ def step(action):
 
 
 def move_player():
+    """
+    Moves the player based on keyboard input.
+
+    This function checks the current state of keyboard keys to determine
+    the direction of player movement. The player is moved left, right, up,
+    or down by a predefined speed if the corresponding 'A', 'D', 'W', or 'S'
+    key is pressed, ensuring the player remains within the screen bounds.
+    """
+
     keys = pygame.key.get_pressed()
     if keys[pygame.K_a] and player.left > 0:
         player.x -= PLAYER_SPEED
@@ -245,6 +291,17 @@ def move_player():
 
 
 def handle_input():
+    """
+    Handles player input and updates game state accordingly.
+
+    This function processes events from the Pygame event queue. If the quit event
+    is detected, it terminates the game. For keydown events, it manages player
+    actions such as aiming and shooting. The arrow keys set the aim direction,
+    shown by a cyan arrow. Double-tapping an arrow key within a defined time
+    interval fires a bullet in the current aim direction. It updates the last
+    key pressed and the time of the key press to handle double-tap shooting.
+    """
+
     global aim_direction, last_key, last_key_time, bullets, game_over
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -274,6 +331,13 @@ def handle_input():
 
 
 def draw_game():
+    """
+    Draws the current game state to the screen.
+
+    This function draws the player, zombies, bullets, aim arrow, and text
+    elements such as health, score, and phase. If the game is over, it also
+    renders a game over message and waits for 2 seconds before exiting.
+    """
     screen.blit(background, (0, 0))
     screen.blit(player_img, player)
     for zombie in zombies:
@@ -299,6 +363,11 @@ def draw_game():
 
 
 def update_game():
+    """
+    Updates the game state by managing phases, spawning and moving zombies, moving bullets, and checking for collisions.
+
+    This function progresses the game through its phases based on elapsed time, spawns zombies at random edges with increasing frequency and speed as phases progress, and moves existing zombies towards the player. It also handles the movement of bullets and checks for collisions between bullets and zombies to update the score. Player health is reduced upon contact with zombies, leading to a game over if health reaches zero.
+    """
     global phase, phase_start, last_spawn, health, game_over, score
     # Update phase
     if phase < len(PHASES) - 1 and time.time() - phase_start > PHASES[phase]["time"]:
@@ -354,6 +423,18 @@ def update_game():
 
 
 def main(human=True):
+    """
+    Main game loop.
+
+    If human is True, the function calls handle_input, move_player, and update_game
+    each frame. If human is False, the function only calls draw_game, and relies on
+    external calls to step to update the game state.
+
+    The function runs an infinite loop, calling either the above functions or
+    draw_game and clock.tick, depending on the value of human. The game loop will
+    continue running until the user closes the game window, at which point the
+    game will exit.
+    """
     global game_over
     while True:
         if human:
