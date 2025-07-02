@@ -128,7 +128,7 @@ python read_npz.py
    Run the training script to let the agent learn from scratch:
 
    ```bash
-   python q_learning_agent_enhanced.py
+   python zombie_shooter_ql.py
    ```
 
 2. **Watch the Agent Play**
