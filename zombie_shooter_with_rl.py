@@ -76,19 +76,25 @@ def reset_game():
 
 
 def get_state():
-    # Discretize player position (10x10 grid)
-    player_x = int(player.x // (WIDTH / 10))
-    player_y = int(player.y // (HEIGHT / 10))
-    # Normalize health
-    health_norm = int(health)
-    # Aim direction (0: up, 1: down, 2: left, 3: right)
-    aim = (
-        0
-        if aim_direction == (0, -1)
-        else 1 if aim_direction == (0, 1) else 2 if aim_direction == (-1, 0) else 3
-    )
-    # Nearest zombie position (discretized, or -1 if none)
-    zombie_x, zombie_y = -1, -1
+    # 1. Player position (near wall or not)
+    player_pos_state = 0
+    if player.top < 50:
+        player_pos_state = 1  # Near Top
+    elif player.bottom > HEIGHT - 50:
+        player_pos_state = 2  # Near Bottom
+    elif player.left < 50:
+        player_pos_state = 3  # Near Left
+    elif player.right > WIDTH - 50:
+        player_pos_state = 4  # Near Right
+
+    # 2. Health (already simple)
+    health_state = int(health)
+
+    # 3. Phase (already simple)
+    phase_state = phase
+
+    # 4. Nearest zombie relative direction
+    zombie_dir_state = 0  # Default to "no zombie"
     if zombies:
         closest = min(
             zombies,
@@ -96,11 +102,29 @@ def get_state():
                 z.centerx - player.centerx, z.centery - player.centery
             ),
         )
-        zombie_x = int(closest.x // (WIDTH / 4))
-        zombie_y = int(closest.y // (HEIGHT / 4))
-    # Phase (0, 1, 2)
-    state = (player_x, player_y, health_norm, aim, zombie_x, zombie_y, phase)
-    return state
+
+        dx = closest.centerx - player.centerx
+        dy = closest.centery - player.centery
+        angle = math.degrees(math.atan2(-dy, dx))  # Angle in degrees
+
+        if -22.5 <= angle < 22.5:
+            zombie_dir_state = 3  # Right
+        elif 22.5 <= angle < 67.5:
+            zombie_dir_state = 2  # Up-Right
+        elif 67.5 <= angle < 112.5:
+            zombie_dir_state = 1  # Up
+        elif 112.5 <= angle < 157.5:
+            zombie_dir_state = 8  # Up-Left
+        elif angle >= 157.5 or angle < -157.5:
+            zombie_dir_state = 7  # Left
+        elif -157.5 <= angle < -112.5:
+            zombie_dir_state = 6  # Down-Left
+        elif -112.5 <= angle < -67.5:
+            zombie_dir_state = 5  # Down
+        elif -67.5 <= angle < -22.5:
+            zombie_dir_state = 4  # Down-Right
+
+    return (player_pos_state, health_state, phase_state, zombie_dir_state)
 
 
 def step(action):
