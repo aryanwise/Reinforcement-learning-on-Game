@@ -1,88 +1,157 @@
-Zombie Shooter: Survival
+# Zombie Shooter with Reinforcement Learning Agent
 
-- Aryan Mishra; Project for Uni- GISMA, Course- AI_Studio [GH-1027140]
+> Developed By: Aryan Mishra
 
-  A fast-paced 2D zombie shooter built with Pygame, inspired by arcade classics. Survive three escalating phases of zombie hordes, move freely with WASD, aim with arrow keys, and double-tap to shoot. Rack up kills, avoid hits, and see how long you can last in this post-apocalyptic grind!
-  Features
+This project demonstrates my implementation of a **Q-learning Reinforcement Learning (RL) agent** trained to play a custom-built 2D arcade game, **"Zombie Shooter,"** developed using Pygame.
 
-Free Movement: Roam the 800x600 arena with WASD controls.
-Three Phases: Face increasing zombie waves:
-Phase 1: Slow zombies, sparse spawns (every 1.5s), 30 seconds.
-Phase 2: Faster zombies, more spawns (every 1s), 30 seconds.
-Phase 3: Rapid zombies, frequent spawns (every 0.5s), until you fall.
+The agent learns to **navigate, evade zombies, and shoot them** to maximize its score and survival time. This repository includes the full game environment, RL training script, playback script, and a Jupyter Notebook for project analysis.
 
-Aiming System: Cyan arrow shows aim direction, controlled by arrow keys.
-Double-Tap Shooting: Double-tap an arrow key to fire bullets in the aim direction.
-Health & Score: 3 health points, score points per zombie kill.
-HUD: Displays health, score, and current phase.
-Game Over: Shows final score and phase reached, exits after 3 seconds.
+---
 
-Requirements
+## 🔧 Setup and Installation
 
-Python 3.8+
-Pygame 2.6.0
+To run this project locally, follow these steps:
 
-Installation
+### 1. Clone the Repository
 
-Clone or download this repository:git clone <repo-url>
-cd zombie-shooter
+```bash
+git clone "https://github.com/aryanwise/Reinforcement-learning-on-Game"
+```
 
-Create a virtual environment (optional but recommended):python -m venv venv
-source venv/bin/activate # On Windows: venv\Scripts\activate
+### 2. Navigate into the Project Directory
 
-Install dependencies:pip install -r requirements.txt
+```bash
+cd Reinforcement-learning-on-Game
+```
 
-Run the game:python zombie_shooter_improved.py
+### 3. Set Up a Virtual Environment
 
-Controls
+It's highly recommended to isolate dependencies using a virtual environment.
 
-Move: WASD (W: up, A: left, S: down, D: right).
-Aim: Arrow keys (up, down, left, right) to set aim direction (shown by cyan arrow).
-Shoot: Double-tap an arrow key within 0.3 seconds to fire a bullet.
-Quit: Close the window or press the exit button.
+#### On macOS/Linux:
 
-Gameplay
+```bash
+python3 -m venv project_env
+source project_env/bin/activate
+```
 
-Objective: Survive as long as possible across three zombie phases, scoring kills.
-Phases:
-Phase 1: Easy, slow zombies, lasts 30 seconds.
-Phase 2: Medium, faster and more zombies, lasts 30 seconds.
-Phase 3: Hard, rapid spawns and fast zombies, continues until game over.
+#### On Windows:
 
-Health: Start with 3 health. Zombies touching you reduce health by 1. Game over at 0 health.
-Scoring: +1 point per zombie killed.
-Zombies: Spawn at random edges (top, bottom, left, right) and chase you.
-Bullets: Fired in aim direction, disappear off-screen.
+```bash
+python -m venv project_env
+.\project_env\Scripts\Activate.ps1
+```
 
-Development
+### 4. Install Dependencies
 
-Language: Python 3 with Pygame.
-Structure:
-zombie_shooter_improved.py: Main game script.
-requirements.txt: Dependencies.
+Install all required packages using:
 
-Assets: Placeholder surfaces (green player, red zombies, white bullets, cyan arrow). Replace with sprites for better visuals.
+```bash
+pip install -r requirements.txt
+```
 
-Future Improvements
+If you do not need the project or dependency you can uninstalle the required packages using:
 
-Sprites: Add pixel art for player, zombies, and bullets (e.g., from itch.io).
-Sounds: Include shooting and kill sounds (e.g., from Freesound.org).
-Power-Ups: Add health or speed boosts as collectibles.
-Background: Use a tiled post-apocalyptic image.
-Cooldown: Add a shooting cooldown to balance double-tap.
-Restart: Implement ‘R’ key to reset game.
-Animations: Add hit flashes or death explosions.
+```bash
+pip uninstall -r requirements.txt
+```
 
-Contributing
-Wanna make this game even sicker? Fork the repo, tweak the code, and submit a pull request. Ideas:
+---
 
-New zombie types (e.g., fast or tanky).
-Weapon upgrades (e.g., shotgun spread).
-Leaderboard for high scores.
+## 📂 File Descriptions and Usage
 
-License
-MIT License. Feel free to use, modify, and share.
-Credits
-Built by a coder with a passion for arcade shooters, inspired by zombie classics. Respect to the Pygame community!
+### `zombie_shooter.py`
 
-Survive the horde, my G! 🧟‍♂️
+- **Purpose:** Main game loop built with Pygame. Lets a human play the game using the keyboard.
+- **Run With:**
+
+```bash
+python zombie_shooter.py
+```
+
+---
+
+### `zombie_shooter_ql.py`
+
+- **Purpose:** Trains the Q-learning RL agent over a series of episodes (e.g., 5000).
+- **Output:** Saves the learned Q-table to `training_data.npz`.
+
+- **Training Mode Toggle:**  
+  You can toggle visual training by editing `VISUAL_TRAINING` inside this script:
+
+  - `True`: Watch the agent train (slower)
+  - `False`: Headless mode (faster)
+
+- **Run With:**
+
+```bash
+python zombie_shooter_ql.py
+```
+
+---
+
+### `play_with_agent.py`
+
+- **Purpose:** Loads the trained Q-table and runs the game using the agent's learned policy.
+- **Run After Training:**
+
+```bash
+python play_with_agent.py
+```
+
+---
+
+### `RL_Project_Analysis.ipynb`
+
+- **Purpose:** A Jupyter Notebook for analyzing the agent’s learned strategy using heatmaps, charts, and statistics.
+- **Run With:**
+
+```bash
+jupyter notebook RL_Project_Analysis.ipynb
+```
+
+### `read_npz.py`
+
+- **Purpose:** A python script to view the q_values and epsilon stored in training_data.npz (numpy arrays format)
+- **Run With:**
+
+```bash
+python read_npz.py
+```
+
+---
+
+## 🚀 How to Use the Project
+
+1. **Train the Agent**
+
+   Run the training script to let the agent learn from scratch:
+
+   ```bash
+   python q_learning_agent_enhanced.py
+   ```
+
+2. **Watch the Agent Play**
+
+   After training, run this to observe the learned behavior:
+
+   ```bash
+   python play_with_agent.py
+   ```
+
+3. **(Optional) Analyze the Project**
+
+   Use the Jupyter Notebook to visualize and interpret how the agent makes decisions:
+
+   ```bash
+   jupyter notebook RL_Project_Analysis.ipynb
+   ```
+
+```
+
+---
+
+## ✅ Summary
+
+Through this project, I successfully built and trained a Q-learning agent capable of surviving and scoring in a dynamic zombie environment. From raw pixel movement to action selection and long-term strategy, the agent learned a survivable policy and demonstrated its competence via visualizations and live play.
+```
