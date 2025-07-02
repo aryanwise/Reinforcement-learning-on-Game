@@ -152,4 +152,4 @@ python read_npz.py
 ## ✅ Summary
 
 Through this project, I successfully built and trained a Q-learning agent capable of surviving and scoring in a dynamic zombie environment. From raw pixel movement to action selection and long-term strategy, the agent learned a survivable policy and demonstrated its competence via visualizations and live play.
-```
+
