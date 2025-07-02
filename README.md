@@ -50,7 +50,7 @@ Install all required packages using:
 pip install -r requirements.txt
 ```
 
-If you do not need the project or dependency you can uninstalle the required packages using:
+If you do not need the project or dependency you can uninstall the required packages using:
 
 ```bash
 pip uninstall -r requirements.txt
