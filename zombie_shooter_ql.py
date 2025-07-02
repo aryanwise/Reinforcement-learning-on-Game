@@ -1,25 +1,54 @@
+import pygame
+import sys
 import numpy as np
 import random
 
-# Import functions from game:
-# Get state: Check what is happening inside the game
-# Step: Perform action and get results eg: new state or reward
-# Reset game: New game after end
-# Draw game, clock, FPS: Visualise agent play
-from zombie_shooter_with_rl import get_state, step, reset_game, draw_game, clock, FPS
+# Make sure your game file is named this or update the import
+from zombie_shooter_with_rl import (
+    get_state,
+    step,
+    reset_game,
+    draw_game,
+    clock,
+    FPS,
+    main,
+)
+
+# --- TRAINING CONTROLS ---
+VISUAL_TRAINING = False  # Set to False to train without graphics for max speed
+LOAD_TRAINING_DATA = True  # Set to True to continue training from a saved file
+SAVE_INTERVAL = 100  # Save the training data every 100 episodes
+TRAINING_FILE = "training_data.npz"  # File to save/load data
 
 # Q-learning parameters
-alpha = 0.1  # Learning rate
-gamma = 0.99  # Discount factor
-epsilon = 1.0  # Exploration rate
+alpha = 0.1
+gamma = 0.99
+# Epsilon will now be loaded from the file if it exists
 epsilon_min = 0.01
 epsilon_decay = 0.995
-episodes = 5000  # We can increase the episode as per training
-action_space_size = 9
-state_space_size = (10, 10, 4, 4, 5, 5, 3)  # Shape of all possible states
 
-# Initialize Q-table
-q_table = np.zeros(state_space_size + (action_space_size,))
+episodes = 5000
+action_space_size = 9
+
+# Simplified state space
+state_space_size = (5, 4, 3, 9)  # (player_pos, health, phase, zombie_direction)
+
+# Initialize or load Q-table and epsilon
+if LOAD_TRAINING_DATA:
+    try:
+        data = np.load(TRAINING_FILE)
+        q_table = data["q_table"]
+        epsilon = data["epsilon"]
+        print(
+            f"Loaded training data. Q-table shape: {q_table.shape}, Epsilon: {epsilon:.4f}"
+        )
+    except FileNotFoundError:
+        print("No training data found. Starting from scratch.")
+        q_table = np.zeros(state_space_size + (action_space_size,))
+        epsilon = 1.0  # Start with max exploration
+else:
+    q_table = np.zeros(state_space_size + (action_space_size,))
+    epsilon = 1.0  # Start with max exploration
 
 
 def choose_action(state):
@@ -29,29 +58,51 @@ def choose_action(state):
         return np.argmax(q_table[state])  # Exploit
 
 
-# Training loop
-for episode in range(episodes):
+# --- Main Training Loop ---
+for episode in range(1, episodes + 1):
     state = reset_game()
     state = get_state()
     total_reward = 0
     done = False
+
     while not done:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                # Save on exit and quit
+                np.savez(TRAINING_FILE, q_table=q_table, epsilon=epsilon)
+                pygame.quit()
+                sys.exit()
+
         action = choose_action(state)
         next_state, reward, done = step(action)
-        # Q-table update
+
         old_value = q_table[state + (action,)]
         next_max = np.max(q_table[next_state])
+
         new_value = (1 - alpha) * old_value + alpha * (reward + gamma * next_max)
         q_table[state + (action,)] = new_value
+
         state = next_state
         total_reward += reward
-        # Update game screen
-        draw_game()
+
+        if VISUAL_TRAINING:
+            draw_game()
+
         clock.tick(FPS)
+
     # Decay epsilon
     if epsilon > epsilon_min:
         epsilon *= epsilon_decay
-    print(f"Episode: {episode + 1}, Total Reward: {total_reward}, Epsilon: {epsilon}")
+
+    print(
+        f"Episode: {episode}, Total Reward: {total_reward:.2f}, Epsilon: {epsilon:.4f}"
+    )
+
+    # Periodically save the Q-table AND epsilon
+    if episode % SAVE_INTERVAL == 0:
+        np.savez(TRAINING_FILE, q_table=q_table, epsilon=epsilon)
+        print(f"--- Training data saved at episode {episode} ---")
 
 print("Training finished.")
-np.save("q_table_enhanced.npy", q_table)
+# Final save
+np.savez(TRAINING_FILE, q_table=q_table, epsilon=epsilon)
